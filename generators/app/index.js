@@ -84,7 +84,7 @@ module.exports = Generator.extend({
   prompting: function () {
 
     this.log(yosay(
-      'Welcome, we now build an Drupal theme, based of the default \n' + chalk.red('Synetic') + ' theme \nand\n' + chalk.blue('Gulp-for-Drupal') + '!'
+      'Welcome, we now build an Drupal theme, based of your default theme \nand\n' + chalk.blue('Gulp-for-Drupal') + '!'
     ));
 
     var prompts = [{
@@ -140,7 +140,6 @@ module.exports = Generator.extend({
       this.props = props;
     }.bind(this));
   },
-
   default: function () {
       var answers = this.props;
     if (installMode_all || answers.installTemplate || answers.installGulp === false){
@@ -251,7 +250,6 @@ module.exports = Generator.extend({
       }
     }
   },
-
   install: function () {
     var answers = this.props;
     if (installMode_all || answers.installGulp || answers.installTemplate === false) {
@@ -259,5 +257,4 @@ module.exports = Generator.extend({
       this.spawnCommandSync("yarn", ["install"], {cwd: themepath});
     }
   }
-
 });
