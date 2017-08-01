@@ -1,6 +1,6 @@
 {
   "name": "generator-drupalfrontend",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Generator for Drupal theme and Gulp",
   "main": "index.js",
   "scripts": {
