@@ -11,7 +11,7 @@ var findInFiles = require('find-in-files');
 var path = require('path');
 var os = require('os');
 var jsonfile = require('jsonfile');
-var homeConfigPath = path.join(os.homedir(), '/yeoman/yo-drupalFrontend-config.json');
+var homeConfigPath = path.join(os.homedir(), '/yo-drupalFrontend-config.json');
 
 var config = {
   "version": "1.0.0",
