@@ -17,18 +17,12 @@ var config = {
   "version": "1.0.0",
   "git": {
     "d8": {
-      "name": "",
       "url": "",
       "branch": "develop"
     },
     "d7": {
-      "name": "",
       "url": "",
       "branch": "develop"
-    },
-    "gulp": {
-      "url": "https://github.com/SyneticNL/Gulp-for-Drupal.git",
-      "branch": "master"
     }
   }
 };
@@ -207,7 +201,7 @@ module.exports = Generator.extend({
     if (installMode_all || answers.installGulp || answers.updateGulp || answers.installTemplate === false){
 
       var destination = 'temp';
-      this.spawnCommandSync('git', ['clone', config.git.gulp.url, destination]);
+      this.spawnCommandSync('git', ['clone', 'https://github.com/SyneticNL/Gulp-for-Drupal.git', destination]);
       if (installMode_all || answers.installTemplate === false){
         fsextra.moveSync('temp/', answers.name + '/', { overwrite: false });
       } else if (answers.updateGulp){
