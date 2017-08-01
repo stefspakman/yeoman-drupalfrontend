@@ -1,0 +1,19 @@
+{
+  "version": "1.0.2",
+  "git": {
+    "d8": {
+      "name": "",
+      "url": "",
+      "branch": "develop"
+    },
+    "d7": {
+      "name": "",
+      "url": "",
+      "branch": "develop"
+    },
+    "gulp": {
+      "url": "https://github.com/SyneticNL/Gulp-for-Drupal.git",
+      "branch": "master"
+    }
+  }
+}

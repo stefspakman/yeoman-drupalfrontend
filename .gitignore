@@ -1,0 +1,9 @@
+# .gitignore - version 1.0.0 2017-08-01
+#
+/node_modules/
+/bower_components/
+.idea
+.DS_Store
+
+# Advised ignores
+**/*.map
