@@ -24,7 +24,7 @@ To update gulp or place gulp/theme file inside an existing theme folder, run ``y
 
  
 ## Changelog
-### 0.2.1 :
+### 0.2.2 :
     *  process imporvements 
     
 ### 0.2.0 : 
