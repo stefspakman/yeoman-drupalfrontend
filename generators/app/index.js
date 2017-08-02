@@ -224,13 +224,17 @@ module.exports = Generator.extend({
                 if ( err ) console.log('ERROR: ' + err);
               });
             } else {
-              fs.unlinkSync('./' + file);
+              try {
+                fs.unlinkSync('./' + file);
+              } catch (err) {
+                console.error(err)
+              }
             }
           } catch (error) {}
       });
         fs.readdirSync('temp/').forEach(file => {
           try {
-            fsextra.copySync('temp/' + file, './' + answers.name + '/' + file);
+            fsextra.copySync('temp/' + file, './' + file);
           } catch (err) {
             console.error(err)
           }
@@ -242,8 +246,9 @@ module.exports = Generator.extend({
       });
       } else {
         fs.readdirSync('temp/').forEach(file => {
+          console.log(file);
           try {
-            fsextra.copySync('temp/' + file, './' + answers.name + '/' + file);
+            fsextra.copySync('temp/' + file, './' + file);
           } catch (err) {
               console.error(err)
             }
@@ -279,9 +284,11 @@ module.exports = Generator.extend({
   },
   install: function () {
     var answers = this.props;
-    if (installMode_all || answers.installGulp || answers.installTemplate === false) {
+    if (installMode_all || answers.installTemplate === false) {
       var themepath = path.join(process.cwd(), this.props.name);
       this.spawnCommandSync("yarn", ["install"], {cwd: themepath});
+    } else if (answers.installGulp) {
+      this.spawnCommandSync("yarn", ["install"], {cwd: './'});
     }
   }
 });
