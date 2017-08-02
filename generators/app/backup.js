@@ -14,17 +14,15 @@ var jsonfile = require('jsonfile');
 var homeConfigPath = path.join(os.homedir(), '/yo-drupalFrontend-config.json');
 
 var config = {
-  "version": "1.0.1",
+  "version": "1.0.0",
   "git": {
     "d8": {
       "url": "",
-      "branch": "develop",
-      "placeholder": "PROJECT_NAME"
+      "branch": "develop"
     },
     "d7": {
       "url": "",
-      "branch": "develop",
-      "placeholder": "PROJECT_NAME"
+      "branch": "develop"
     }
   }
 };
@@ -35,9 +33,8 @@ if (fs.existsSync(homeConfigPath)) {
   if (temp.version === config.version){
     config = temp;
   } else {
-    fs.rename(homeConfigPath, path.join(os.homedir(), '/yo-drupalFrontend-config--old.json'), function(err) {
-      if ( err ) console.log('ERROR: ' + err)
-      else console.log("hallo");
+    fs.rename(homeConfigPath, 'yo-drupalFrontend-config--old.json', function(err) {
+      if ( err ) console.log('ERROR: ' + err);
     });
     jsonfile.writeFileSync(homeConfigPath, config, {spaces: 2});
     console.log(yosay(
@@ -90,11 +87,11 @@ module.exports = Generator.extend({
       message : 'We found a template but no Gulpfile, would you like to install Gulp?',
       when    : installMode_gulp
     }, {
-        type    : 'confirm',
-        name    : 'installTemplate',
-        message : 'We found a Gulpfile but no template, would you like to install only the templatefiles?',
-        when    : installMode_template
-      }, {
+      type    : 'confirm',
+      name    : 'installTemplate',
+      message : 'We found a Gulpfile but no template, would you like to install only the templatefiles?',
+      when    : installMode_template
+    }, {
       type    : 'confirm',
       name    : 'updateGulp',
       message : 'We found a Gulpfile and a template, would you like to update Gulp?',
@@ -138,52 +135,133 @@ module.exports = Generator.extend({
     }.bind(this));
   },
   default: function () {
-      var answers = this.props;
-
+    var answers = this.props;
     if (installMode_all || answers.installTemplate || answers.installGulp === false){
-      var drupalSettings;
-      if (answers.drupal === 'Drupal 8'){
-        drupalSettings = config.git.d8;
-      } else if (answers.drupal === 'Drupal 7') {
-        drupalSettings = config.git.d7;
+      var themePath;
+      var replaceInTemplatePath;
+      if (answers.installTemplate){
+        if (answers.drupal === 'Drupal 8'){
+          var gitURL = config.git.d8.url;
+          this.spawnCommandSync('git', ['clone', '-b', config.git.d8.branch, gitURL, 'temp']);
+        } else {
+          var gitURL = config.git.d7.url;
+          this.spawnCommandSync('git', ['clone', '-b', config.git.d7.branch, gitURL, 'temp']);
+        }
+        fsextra.moveSync('temp/', './', { overwrite: false });
+
+        themePath = './';
+        replaceInTemplatePath = './';
+      } else {
+        if (answers.drupal === 'Drupal 8'){
+          var gitURL = config.git.d8.url;
+          this.spawnCommandSync('git', ['clone', '-b', config.git.d8.branch, gitURL, answers.name]);
+        } else {
+          var gitURL = config.git.d7.url;
+          this.spawnCommandSync('git', ['clone', '-b', config.git.d7.branch, gitURL, answers.name]);
+        }
+        themePath = './' + answers.name + '/';
+        replaceInTemplatePath = './' + answers.name;
       }
 
-      if (answers.installTemplate){
-        this.spawnCommandSync('git', ['clone', '-b', drupalSettings.branch, drupalSettings.url, 'temp']);
-        fsextra.moveSync('temp/', './', { overwrite: false });
-        replacePlaceholder('./', answers.name, drupalSettings.placeholder);
-        replacePlaceholderInFile('./', answers.name, drupalSettings.placeholder);
-      } else {
-        this.spawnCommandSync('git', ['clone', '-b', drupalSettings.branch, drupalSettings.url, answers.name]);
-        replacePlaceholder('./' + answers.name + '/', answers.name, drupalSettings.placeholder);
-        replacePlaceholderInFile('./' + answers.name, answers.name, drupalSettings.placeholder);
-      }
+      var allFiles;
+      fs.readdirSync(themePath).forEach(file => {
+        allFiles = file;
+    });
+
+      glob("**/@(PROJECT_NAME*)", function (er, allFiles) {
+        for (var i = 0; i < allFiles.length; i++){
+          var toName = allFiles[i].replace("PROJECT_NAME", answers.name);
+          fs.rename(allFiles[i], toName, function(err) {
+            if ( err ) console.log('ERROR: ' + err);
+          });
+        }
+      });
+
+
+      findInFiles.findSync("PROJECT_NAME", replaceInTemplatePath)
+        .then(function(results) {
+          for (var result in results) {
+            try {
+              const changedFiles = replace.sync({
+                files: result,
+                from: /PROJECT_NAME/g,
+                to: answers.name,
+                allowEmptyPaths: false,
+                encoding: 'utf8',
+              });
+              console.log('Modified files:', changedFiles.join(', '));
+            }
+            catch (error) {
+              console.error('Error occurred:', error);
+            }
+          }
+        });
     }
 
     if (installMode_all || answers.installGulp || answers.updateGulp || answers.installTemplate === false){
-      this.spawnCommandSync('git', ['clone', 'https://github.com/SyneticNL/Gulp-for-Drupal.git', 'temp']);
+
+      var destination = 'temp';
+      this.spawnCommandSync('git', ['clone', 'https://github.com/SyneticNL/Gulp-for-Drupal.git', destination]);
       if (installMode_all || answers.installTemplate === false){
         copyAndRemove('temp/', './' + answers.name + '/');
+        // fs.readdirSync('temp/').forEach(file => {
+        //   try {
+        //     fsextra.copySync('temp/' + file, './' + answers.name + '/' + file);
+        //   } catch (err) {
+        //     console.error(err)
+        //   }
+        //   try {
+        //   fs.unlinkSync('temp/' + file);
+        //   } catch (err) {
+        //     console.error(err)
+        //   }
+        // });
       } else if (answers.updateGulp){
         fs.readdirSync('temp/').forEach(file => {
-          try {
-            if (file === 'gulpconfig.json'){
-              fs.rename('./gulpconfig.json', 'gulpconfig--old.json', function(err) {
-                if ( err ) console.log('ERROR: ' + err);
-              });
-            } else {
-              try {
-                fs.unlinkSync('./' + file);
-              } catch (err) {
-                console.error(err);
-              }
+          console.log(file);
+        try {
+          if (file === 'gulpconfig.json'){
+            fs.rename('./gulpconfig.json', 'gulpconfig--old.json', function(err) {
+              if ( err ) console.log('ERROR: ' + err);
+            });
+          } else {
+            try {
+              fs.unlinkSync('./' + file);
+            } catch (err) {
+              console.error(err)
             }
-          } catch (error) {}
+          }
+        } catch (error) {}
       });
         copyAndRemove('temp/', './');
+        fs.readdirSync('temp/').forEach(file => {
+          try {
+            fsextra.copySync('temp/' + file, './' + file);
+      } catch (err) {
+          console.error(err)
+        }
+        try {
+          fs.unlinkSync('temp/' + file);
+        } catch (err) {
+          console.error(err)
+        }
+      });
       } else {
-        copyAndRemove('temp/', './');
+        fs.readdirSync('temp/').forEach(file => {
+          console.log(file);
+        try {
+          fsextra.copySync('temp/' + file, './' + file);
+        } catch (err) {
+          console.error(err)
+        }
+        try {
+          fs.unlinkSync('temp/' + file);
+        } catch (err) {
+          console.error(err)
+        }
+      });
       }
+
 
       try {
         var files;
@@ -207,63 +285,27 @@ module.exports = Generator.extend({
     }
   },
   install: function () {
-    var answers = this.props;
-    if (installMode_all || answers.installTemplate === false) {
-      var themepath = path.join(process.cwd(), this.props.name);
-      this.spawnCommandSync("yarn", ["install"], {cwd: themepath});
-    } else if (answers.installGulp) {
-      this.spawnCommandSync("yarn", ["install"], {cwd: './'});
-    }
+    // var answers = this.props;
+    // if (installMode_all || answers.installTemplate === false) {
+    //   var themepath = path.join(process.cwd(), this.props.name);
+    //   this.spawnCommandSync("yarn", ["install"], {cwd: themepath});
+    // } else if (answers.installGulp) {
+    //   this.spawnCommandSync("yarn", ["install"], {cwd: './'});
+    // }
   }
 });
-
-function replacePlaceholder(path, folder, placeholder) {
-  var allFiles;
-  fs.readdirSync(path).forEach(file => {
-    allFiles = file;
-  });
-  var global = "**/@(" + placeholder + "*)";
-  glob(global, function (er, allFiles) {
-    for (var i = 0; i < allFiles.length; i++){
-      var toName = allFiles[i].replace(placeholder, folder);
-      fs.rename(allFiles[i], toName, function(err) {
-        if ( err ) console.log('ERROR: ' + err);
-      });
-    }
-  });
-}
-
-function replacePlaceholderInFile(path, folder, placeholder){
-  findInFiles.findSync(placeholder, path)
-    .then(function(results) {
-      for (var result in results) {
-        try {
-          const changedFiles = replace.sync({
-            files: result,
-            from: new RegExp(placeholder,"g"),
-            to: folder,
-            allowEmptyPaths: false,
-            encoding: 'utf8',
-          });
-        }
-        catch (error) {
-          console.error('Error occurred:', error);
-        }
-      }
-    });
-}
 
 function copyAndRemove(src, dist) {
   fs.readdirSync(src).forEach(file => {
     try {
       fsextra.copySync(src + file, dist + file);
-    } catch (err) {
-      console.error(err);
-    }
-    try {
-      fs.unlinkSync(src + file);
-    } catch (err) {
-      console.error(err);
-    }
-  });
+} catch (err) {
+    console.error(err)
+  }
+  try {
+    fs.unlinkSync(src + file);
+  } catch (err) {
+    console.error(err);
+  }
+});
 }
