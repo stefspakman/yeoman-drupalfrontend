@@ -24,7 +24,10 @@ To update gulp or place gulp/theme file inside an existing theme folder, run ``y
 
  
 ## Changelog
-0.1.2 :
-   * removed Gulp options from config file
-   * removed unused name from config file
-   * added README
+### 0.2.0 : 
+    * Fixed moving gulp files for MacOS
+    
+### 0.1.2 :
+    * removed Gulp options from config file
+    * removed unused name from config file
+    * added README

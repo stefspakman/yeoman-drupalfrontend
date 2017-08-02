@@ -203,7 +203,18 @@ module.exports = Generator.extend({
       var destination = 'temp';
       this.spawnCommandSync('git', ['clone', 'https://github.com/SyneticNL/Gulp-for-Drupal.git', destination]);
       if (installMode_all || answers.installTemplate === false){
-        fsextra.moveSync('temp/', answers.name + '/', { overwrite: false });
+        fs.readdirSync('temp/').forEach(file => {
+          try {
+            fsextra.copySync('temp/' + file, './' + answers.name + '/' + file);
+          } catch (err) {
+            console.error(err)
+          }
+          try {
+          fs.unlinkSync('temp/' + file);
+          } catch (err) {
+            console.error(err)
+          }
+        });
       } else if (answers.updateGulp){
         fs.readdirSync('temp/').forEach(file => {
           console.log(file);
@@ -213,13 +224,40 @@ module.exports = Generator.extend({
                 if ( err ) console.log('ERROR: ' + err);
               });
             } else {
-              fs.unlinkSync('./' + file);
+              try {
+                fs.unlinkSync('./' + file);
+              } catch (err) {
+                console.error(err)
+              }
             }
           } catch (error) {}
       });
-        fsextra.moveSync('temp/', './', { overwrite: false });
+        fs.readdirSync('temp/').forEach(file => {
+          try {
+            fsextra.copySync('temp/' + file, './' + file);
+          } catch (err) {
+            console.error(err)
+          }
+          try {
+            fs.unlinkSync('temp/' + file);
+          } catch (err) {
+            console.error(err)
+          }
+      });
       } else {
-        fsextra.moveSync('temp/', './', { overwrite: false });
+        fs.readdirSync('temp/').forEach(file => {
+          console.log(file);
+          try {
+            fsextra.copySync('temp/' + file, './' + file);
+          } catch (err) {
+              console.error(err)
+            }
+            try {
+              fs.unlinkSync('temp/' + file);
+            } catch (err) {
+              console.error(err)
+            }
+          });
       }
 
 
@@ -246,9 +284,11 @@ module.exports = Generator.extend({
   },
   install: function () {
     var answers = this.props;
-    if (installMode_all || answers.installGulp || answers.installTemplate === false) {
+    if (installMode_all || answers.installTemplate === false) {
       var themepath = path.join(process.cwd(), this.props.name);
       this.spawnCommandSync("yarn", ["install"], {cwd: themepath});
+    } else if (answers.installGulp) {
+      this.spawnCommandSync("yarn", ["install"], {cwd: './'});
     }
   }
 });
