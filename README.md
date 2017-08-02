@@ -24,6 +24,9 @@ To update gulp or place gulp/theme file inside an existing theme folder, run ``y
 
  
 ## Changelog
+### 0.2.1 :
+    *  process imporvements 
+    
 ### 0.2.0 : 
     * Fixed moving gulp files for MacOS
     
