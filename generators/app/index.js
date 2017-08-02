@@ -203,7 +203,18 @@ module.exports = Generator.extend({
       var destination = 'temp';
       this.spawnCommandSync('git', ['clone', 'https://github.com/SyneticNL/Gulp-for-Drupal.git', destination]);
       if (installMode_all || answers.installTemplate === false){
-        fsextra.moveSync('temp/', answers.name + '/', { overwrite: false });
+        fs.readdirSync('temp/').forEach(file => {
+          try {
+            fsextra.copySync('temp/' + file, './' + answers.name + '/' + file);
+          } catch (err) {
+            console.error(err)
+          }
+          try {
+          fs.unlinkSync('temp/' + file);
+          } catch (err) {
+            console.error(err)
+          }
+        });
       } else if (answers.updateGulp){
         fs.readdirSync('temp/').forEach(file => {
           console.log(file);
@@ -217,9 +228,31 @@ module.exports = Generator.extend({
             }
           } catch (error) {}
       });
-        fsextra.moveSync('temp/', './', { overwrite: false });
+        fs.readdirSync('temp/').forEach(file => {
+          try {
+            fsextra.copySync('temp/' + file, './' + answers.name + '/' + file);
+          } catch (err) {
+            console.error(err)
+          }
+          try {
+            fs.unlinkSync('temp/' + file);
+          } catch (err) {
+            console.error(err)
+          }
+      });
       } else {
-        fsextra.moveSync('temp/', './', { overwrite: false });
+        fs.readdirSync('temp/').forEach(file => {
+          try {
+            fsextra.copySync('temp/' + file, './' + answers.name + '/' + file);
+          } catch (err) {
+              console.error(err)
+            }
+            try {
+              fs.unlinkSync('temp/' + file);
+            } catch (err) {
+              console.error(err)
+            }
+          });
       }
 
 
