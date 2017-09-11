@@ -24,6 +24,9 @@ To update gulp or place gulp/theme file inside an existing theme folder, run ``y
 
  
 ## Changelog
+### 0.3.0 :
+    *  Fixed not removing .git and temp folders so themes are no longer connected to original git repo
+     
 ### 0.2.2 :
     *  process imporvements 
     

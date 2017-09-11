@@ -2,6 +2,7 @@
 var Generator = require('yeoman-generator');
 var fs = require('fs');
 var fsextra = require('fs-extra');
+var del = require('del');
 var glob = require("glob");
 var yosay = require('yosay');
 var chalk = require('chalk');
@@ -150,11 +151,13 @@ module.exports = Generator.extend({
 
       if (answers.installTemplate){
         this.spawnCommandSync('git', ['clone', '-b', drupalSettings.branch, drupalSettings.url, 'temp']);
+        del.sync(['temp/.git']);
         fsextra.moveSync('temp/', './', { overwrite: false });
         replacePlaceholder('./', answers.name, drupalSettings.placeholder);
         replacePlaceholderInFile('./', answers.name, drupalSettings.placeholder);
       } else {
         this.spawnCommandSync('git', ['clone', '-b', drupalSettings.branch, drupalSettings.url, answers.name]);
+        del.sync([answers.name + '/.git']);
         replacePlaceholder('./' + answers.name + '/', answers.name, drupalSettings.placeholder);
         replacePlaceholderInFile('./' + answers.name, answers.name, drupalSettings.placeholder);
       }
@@ -162,18 +165,19 @@ module.exports = Generator.extend({
 
     if (installMode_all || answers.installGulp || answers.updateGulp || answers.installTemplate === false){
       this.spawnCommandSync('git', ['clone', 'https://github.com/SyneticNL/Gulp-for-Drupal.git', 'temp']);
+      del.sync(['temp/.git']);
       if (installMode_all || answers.installTemplate === false){
         copyAndRemove('temp/', './' + answers.name + '/');
       } else if (answers.updateGulp){
         fs.readdirSync('temp/').forEach(file => {
           try {
-            if (file === 'gulpconfig.json'){
+            if (file === 'gulpconfig.json') {
               fs.rename('./gulpconfig.json', 'gulpconfig--old.json', function(err) {
                 if ( err ) console.log('ERROR: ' + err);
               });
             } else {
               try {
-                fs.unlinkSync('./' + file);
+                del.sync(['./' + file]);
               } catch (err) {
                 console.error(err);
               }
@@ -197,7 +201,7 @@ module.exports = Generator.extend({
           from: /example.dev/g,
           to: answers.url,
           allowEmptyPaths: false,
-          encoding: 'utf8',
+          encoding: 'utf8'
         });
         console.log('Modified files:', setGulpUrl.join(', '));
       }
@@ -243,7 +247,7 @@ function replacePlaceholderInFile(path, folder, placeholder){
             from: new RegExp(placeholder,"g"),
             to: folder,
             allowEmptyPaths: false,
-            encoding: 'utf8',
+            encoding: 'utf8'
           });
         }
         catch (error) {
@@ -261,9 +265,10 @@ function copyAndRemove(src, dist) {
       console.error(err);
     }
     try {
-      fs.unlinkSync(src + file);
+      del.sync([src + file]);
     } catch (err) {
       console.error(err);
     }
   });
+  del.sync([src]); //Delete Src folder (usually temp folder)
 }
