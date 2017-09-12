@@ -6,7 +6,6 @@ var del = require('del');
 var glob = require("glob");
 var yosay = require('yosay');
 var chalk = require('chalk');
-var mv = require('mv');
 var replace = require('replace-in-file');
 var findInFiles = require('find-in-files');
 var path = require('path');
@@ -29,12 +28,17 @@ var config = {
     }
   }
 };
-
+var themeChoices = [];
 if (fs.existsSync(homeConfigPath)) {
-  console.log('Using local Config');
   var temp = require(homeConfigPath);
   if (temp.version === config.version){
     config = temp;
+    Object.keys(config.git).forEach(function(theme) {
+      themeChoices.push({
+        name: theme
+      });
+    });
+    console.log(themeChoices);
   } else {
     fs.rename(homeConfigPath, path.join(os.homedir(), '/yo-drupalFrontend-config--old.json'), function(err) {
       if ( err ) console.log('ERROR: ' + err)
@@ -114,9 +118,9 @@ module.exports = Generator.extend({
       when    : installMode_all || function (response) { if (response.updateGulp || response.installGulp) { return false } else { return true };}
     }, {
       type: 'list',
-      name: 'drupal',
-      message: 'Which version of Drupal do you use?',
-      choices:[{name: 'Drupal 8'}, {name: 'Drupal 7'}],
+      name: 'theme',
+      message: 'Which theme do you want to use?',
+      choices:themeChoices,
       store   : false,
       when    : installMode_all || function (response) { if (response.updateGulp || response.installGulp) { return false } else { return true };}
     }, {
@@ -142,13 +146,7 @@ module.exports = Generator.extend({
       var answers = this.props;
 
     if (installMode_all || answers.installTemplate || answers.installGulp === false){
-      var drupalSettings;
-      if (answers.drupal === 'Drupal 8'){
-        drupalSettings = config.git.d8;
-      } else if (answers.drupal === 'Drupal 7') {
-        drupalSettings = config.git.d7;
-      }
-
+      var drupalSettings = config.git[answers.theme];
       if (answers.installTemplate){
         this.spawnCommandSync('git', ['clone', '-b', drupalSettings.branch, drupalSettings.url, 'temp']);
         del.sync(['temp/.git']);

@@ -7,14 +7,14 @@ An Yeoman generator to scaffold a Drupal theme and [Gulp For Drupal](https://git
 ## Functionality
 You can use this generator to:
  * set up a new theme
- * place gulp inside an existing theme
+ * place gulp inside an existing theme 
  * place theme files inside an existing gulp folder
  * update your gulp installation
+ * Use [Gulp For Drupal](https://github.com/SyneticNL/Gulp-for-Drupal/)!!
  
 ## Configuration
-A config file will be created on first usage, edit this file to include your prefered Drupal 7 & Drupal 8 theme. 
-[Gulp For Drupal](https://github.com/SyneticNL/Gulp-for-Drupal/) will be installed inside the theme folder.
-
+A config file will be created on first usage, edit this file to include your prefered Drupal themes. By default, the config file wil contain a section for a D7 and a section D8 theme. You can add as much themes as you need. Yeoman will ask which theme you want to use.
+ 
 If you include private repositories, make sure your local git installation can access it.
 
 ## Usage
@@ -24,6 +24,9 @@ To update gulp or place gulp/theme file inside an existing theme folder, run ``y
 
  
 ## Changelog
+### 0.4.0 :
+    *  You can add multiple themes, by default the config contains a section for d8 and d7 themes.
+    
 ### 0.3.0 :
     *  Fixed not removing .git and temp folders so themes are no longer connected to original git repo
      
